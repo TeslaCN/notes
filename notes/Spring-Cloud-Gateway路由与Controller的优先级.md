@@ -1,4 +1,4 @@
----
+<!-- ---
 title: Spring-Cloud-Gateway | 直接请求 @RequesetMapping 的 Controller 时  GlobalFilter 不生效
 date: 2019-11-15 23:43:31
 tags:
@@ -9,7 +9,7 @@ tags:
 categories:
 - Spring Cloud
 - Spring Cloud Gateway
----
+--- -->
 
 # 请求网关层项目中的 Controller 且 ”请求路径“ 与 @RequestMapping 一致时，GlobalFilter 不生效
 
@@ -19,25 +19,25 @@ categories:
 
 ## 1 前言
 
-之前的项目网关层都是使用Feign并复制上游的接口定义粘贴到网关层项目中，
-然后编写Controller调用下游。即大部分接口都要在网关层复制一份，部分接口在网关做一些简单的逻辑。
-这种方式非常繁琐，一旦上游修改接口或者DTO，网关层都要同步修改。当一份接口复制到多个网关层，修改起来存在一定工作量，且容易出错。也不知道是谁想出来这么做的🌚🌚
+之前的项目网关层都是使用 Feign 并复制上游的接口定义粘贴到网关层项目中，
+然后编写 Controller 调用下游。即大部分接口都要在网关层复制一份，部分接口在网关做一些简单的逻辑。
+这种方式非常繁琐，一旦上游修改接口或者 DTO，网关层都要同步修改。当一份接口复制到多个网关层，修改起来存在一定工作量，且容易出错。也不知道是谁想出来这么做的🌚🌚
 
-最近使用Spring Cloud Gateway作为应用网关。在网关层，只需进行一定配置，发送到网关的请求会根据一定的规则路由到对应的服务，省去了以前复制接口的工作，减少了网关层的工作量。
+最近使用 Spring Cloud Gateway 作为应用网关。在网关层，只需进行一定配置，发送到网关的请求会根据一定的规则路由到对应的服务，省去了以前复制接口的工作，减少了网关层的工作量。
 
 虽然大部分接口都是可以直接转发到对应服务，还有少部分接口需要在网关层做一些逻辑，例如生成打印图片返回给App端。
 这部分逻辑不适合直接做在后端服务中，前端做起来也有难度，因此，这部分逻辑可以放到网关层实现。
 
 **目前遇到一个问题，即本文探讨的问题：** 网关层的操作需要鉴权，因此存在一个用于鉴权的GlobalFilter，
 前端的请求只有带有有效的登录信息才会被转发到后端对应的服务。
-现在在网关层中编写了一个逻辑简单但必要的Controller，这个Controller中的接口同样需要鉴权。
-但经过测试，对应Controller的RequestMapping的请求不会经过GlobalFilter，直接发到了Controller中，即未被鉴权。
+现在在网关层中编写了一个逻辑简单但必要的 Controller，这个 Controller 中的接口同样需要鉴权。
+但经过测试，对应 Controller 的 RequestMapping 的请求不会经过 GlobalFilter，直接发到了 Controller 中，即未被鉴权。
 
 
 ## 2 实践
 
-> 此处直接在开源版本的[xxl-sso](https://github.com/teslacn/xxl-sso)上创建一个基于Spring-Cloud-Gateway的Client
-> 并通过GlobalFilter实现鉴权过滤器
+> 此处直接在开源版本的[xxl-sso](https://github.com/teslacn/xxl-sso)上创建一个基于 Spring-Cloud-Gateway 的 Client
+> 并通过 GlobalFilter 实现鉴权过滤器
 
 ### 2.1 编写Controller
 
@@ -116,7 +116,7 @@ spring.cloud.gateway.routes[2].predicates[0]=Path=/TeslaCN/**
 
 ### 2.4 启动 DEBUG 打断点，发送请求
 
-将断点打在了filter逻辑的第一行
+将断点打在了 filter 逻辑的第一行
 
 ![breakpoint](https://wuweijie.oss-cn-shenzhen.aliyuncs.com/blog/resource/2019/09/Spring-Cloud-Gateway_GlobalFilter_doesnt_work/breakpoint.png)
 
@@ -157,7 +157,7 @@ spring.cloud.gateway.routes[2].predicates[0]=Path=/TeslaCN/**
 ##### 预期结果  
 
 未登录时，拦截请求并返回如[2.4.1](#241-%e7%9b%b4%e6%8e%a5%e8%af%b7%e6%b1%82-teslacnxxl-sso)中的结果；
-附带有效的xxl_sso_sessionid发送请求时，接口按照逻辑返回当前登录的用户信息
+附带有效的 xxl_sso_sessionid 发送请求时，接口按照逻辑返回当前登录的用户信息
 
 ##### 实际结果  
 
@@ -173,15 +173,15 @@ spring.cloud.gateway.routes[2].predicates[0]=Path=/TeslaCN/**
 
 ##### 猜想
 
-也许是因为网关路由的优先级低于RequestMapping，所以“请求路径”和`@RequestMapping`一致时优先匹配RequestMapping？
+也许是因为网关路由的优先级低于 RequestMapping，所以“请求路径”和 @RequestMapping 一致时优先匹配 RequestMapping？
 
 ## 3 分析与验证
 
-Spring Web MVC 有 `DispatcherServlet`，Spring Cloud Gateway (WebFlux) 同样也有 `DispatcherHandler`
+Spring Web MVC 有 DispatcherServlet，Spring Cloud Gateway (WebFlux) 同样也有 DispatcherHandler
 
-先从 `DispatcherHandler` 的源码下手
+先从 DispatcherHandler 的源码下手
 
-### `DispatcherHandler` 源码节选
+### DispatcherHandler 源码节选
 
 Version: org.springframework:spring-webflux:5.0.4.RELEASE
 
@@ -265,16 +265,16 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 }
 ```
 
-#### `DispatcherHandler` 初始化
+#### DispatcherHandler 初始化
 
-关注 Field 和初始化方法，在 `initStrategies` 方法打了个断点。
+关注 Field 和初始化方法，在 initStrategies 方法打了个断点。
 
 可以看到，此时3个 Field 都是 null
 
 ![dispatcherhandler-init-1](https://wuweijie.oss-cn-shenzhen.aliyuncs.com/blog/resource/2019/09/Spring-Cloud-Gateway_GlobalFilter_doesnt_work/dispatcherhandler-init-1.png)
 
 
-执行了第1行代码后，handlerMappings 的 Bean实例 都拿到了。
+执行了第1行代码后，handlerMappings 的 Bean 实例都拿到了。
 可以看到，数组中有 4个Mapping，其中包括了：
 * `RequestMappingHandlerMapping`
 * `RoutePredicateHandlerMapping`
@@ -285,23 +285,23 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 ![ordered-handler-mappings](https://wuweijie.oss-cn-shenzhen.aliyuncs.com/blog/resource/2019/09/Spring-Cloud-Gateway_GlobalFilter_doesnt_work/ordered-handler-mappings.png)
 
-点开 `handlerMappings` 的属性
+点开 handlerMappings 的属性
 
 ![handler-mappings-fields](https://wuweijie.oss-cn-shenzhen.aliyuncs.com/blog/resource/2019/09/Spring-Cloud-Gateway_GlobalFilter_doesnt_work/handler-mappings-fields.png)
 
 其实看到这里，答案也有了。
 
-**`RequestMappingHandlerMapping` order < `RoutePredicateHandlerMapping` order**
+**RequestMappingHandlerMapping 的 order < RoutePredicateHandlerMapping 的 order**
 
-HandlerMapping的顺序问题，我浏览了
+HandlerMapping 的顺序问题，我浏览了
 [Reference Doc. 2.2.0 RC2](https://cloud.spring.io/spring-cloud-static/spring-cloud-gateway/2.2.0.RC2/reference/html/)
 貌似没有找到相关顺序的配置项
 
 ## 4 思考
 
-官方文档没有提到 `HandlerMapping` 的顺序的配置项，是因为”遗漏了“还是”设计本如此“？
+官方文档没有提到 HandlerMapping 的顺序的配置项，是因为”遗漏了“还是”设计本如此“？
 
-`RoutePredicateHandlerMapping` 源码节选
+RoutePredicateHandlerMapping 源码节选
 ```java
 public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
 
@@ -345,19 +345,19 @@ public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 
 在文档第15节
 [15. Building a Simple Gateway Using Spring MVC or Webflux](https://cloud.spring.io/spring-cloud-static/spring-cloud-gateway/2.2.0.RC2/reference/html/#building-a-simple-gateway-using-spring-mvc-or-webflux)
-提到通过 `WebFlux` 构建简单的网关
+提到通过 WebFlux 构建简单的网关
 
 ![doc-15](https://wuweijie.oss-cn-shenzhen.aliyuncs.com/blog/resource/2019/09/Spring-Cloud-Gateway_GlobalFilter_doesnt_work/doc-15.png)
 
-假设我调整了 `RequestMappingHandlerMapping` 和 `RoutePredicateHandlerMapping` 
+假设我调整了 RequestMappingHandlerMapping 和 RoutePredicateHandlerMapping 
 的顺序，使后者顺序更前，我在本项目所写的 GlobalFilter 就能够直接作用在 Controller 上，
 实际结果可能就和
 [2.4.3](#243-%e8%af%b7%e6%b1%82-gateway-%e4%b8%ad%e7%9a%84-controller)
 所提到的预期结果一致了
 
-但同时，上述文档提到的通过 `WebFlux` / `MVC` 构建网关的方式，所有请求都会经过Filter，
+但同时，上述文档提到的通过 WebFlux / MVC 构建网关的方式，所有请求都会经过 Filter，
 ~~此时会出现问题~~
-貌似也不会有问题，让所有请求都经过了Filter。
+貌似也不会有问题，让所有请求都经过了 Filter。
 
 **应该结合具体场景考虑**
 

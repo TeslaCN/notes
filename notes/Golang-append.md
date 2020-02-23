@@ -1,4 +1,4 @@
----
+<!-- ---
 title: Golang 内置函数 append() 踩坑
 date: 2020-02-12 10:10:18
 tags:
@@ -7,7 +7,7 @@ tags:
 categories:
 - Golang
 - 踩坑
----
+--- -->
 
 # Golang 内置函数 append() 踩坑
 

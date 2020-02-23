@@ -1,4 +1,4 @@
----
+<!-- ---
 title: Jenkins 初探
 date: 2019-10-30 08:56:31
 tags:
@@ -7,7 +7,7 @@ tags:
 categories:
 - Jenkins
 - CI/CD
----
+--- -->
 
 # Jenkins 初探
 

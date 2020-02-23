@@ -1,4 +1,4 @@
----
+<!-- ---
 title: 基础镜像选择问题 | Alpine作为基础镜像的坑
 date: 2019-10-11 22:48:06
 tags: 
@@ -8,20 +8,20 @@ tags:
 categories:
 - Docker
 - 踩坑
----
+--- -->
 
 # 基础镜像选择问题 | `Alpine`作为基础镜像的坑
 
 ## 1 大致流程
 
-* `alpine`镜像体积只有5MB，作为`Docker`下最小的Linux镜像，很适合打造一些轻量级镜像。但`alpine`底层使用`musl-libc`，兼容性与`glibc`有一定差距。
+* alpine 镜像体积只有5MB，作为 Docker 下最小的 Linux 镜像，很适合打造一些轻量级镜像。但 alpine 底层使用 musl-libc，兼容性与 glibc 有一定差距。
 
-1. 用`Golang`编写了一个简单的hello, world程序，`Dockerfile`使用`alpine`作为基础镜像`FROM alpine:latest`能够正常运行；
-2. 基于Gin框架Web应用，相似的Dockerfile文件，build完成后run的时候报了一些不明原因的错误，最后基础镜像改为`centos`或`alpine-glibc`后(`FROM centos:latest`)重新构建的镜像可以正常运行。
+1. 用 Golang 编写了一个简单的 hello, world 程序， Dockerfile 使用 alpine 作为基础镜像 `FROM alpine:latest` 能够正常运行；
+2. 基于 Gin 框架 Web 应用，相似的 Dockerfile 文件，build 完成后 run 的时候报了一些不明原因的错误，最后基础镜像改为 centos 或 alpine-glibc 后 (`FROM centos:latest`) 重新构建的镜像可以正常运行。
 
 ## 2 问题复现
 
-### 2.1 使用`alpine`作为基础镜像构建Golang `hello, world`应用，`ENTRYPOINT`使用`sh`运行程序
+### 2.1 使用 alpine 作为基础镜像构建 Golang  hello, world`应用，`ENTRYPOINT`使用`sh`运行程序
 
 #### 2.1.1 编写`hello, world` Dockerfile，基础镜像alpine
 
@@ -85,7 +85,7 @@ os.Args: [./hello]
 hello, go & docker
 ```
 
-由此可见，**运行hello, world没啥问题**
+由此可见，**运行 hello, world 没啥问题**
 
 ### 2.2 使用`alpine`作为基础镜像构建web应用，`ENTRYPOINT`使用`sh`运行程序
 
@@ -138,7 +138,7 @@ Successfully tagged orderserver:build-with-alpine
 
 `docker : sh: /orderserver: not found`
 
-镜像因为不明原因报了找不到orderserver文件
+镜像因为不明原因报了找不到 orderserver 文件
 
 ### 2.3 使用`alpine`作为基础镜像构建，`ENTRYPOINT`直接执行目标二进制文件，有更详细的报错信息，但仍然难以排查原因
 
@@ -195,7 +195,7 @@ Successfully tagged orderserver:for-test
 报错信息：
 `docker : standard_init_linux.go:211: exec user process caused "no such file or directory"`
 
-与使用sh执行相比，报错信息更详细，不过貌似对问题排查仍然没什么帮助
+与使用 sh 执行相比，报错信息更详细，不过貌似对问题排查仍然没什么帮助
 
 
 ### 2.4 使用`frolvlad/alpine-glibc`作为基础镜像构建并运行
@@ -271,4 +271,4 @@ os.Args: [/orderserver -config /mounted/config.json]
 
 ## 3 总结
 
-1. 选择基础镜像需要谨慎
+1. 选择基础镜像需要充分考虑运行环境要求，当遇到未知错误时，需要考虑运行环境兼容性问题。
